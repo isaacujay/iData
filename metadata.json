@@ -1,0 +1,6 @@
+{
+  "name": "IData Business Portfolio & Portal",
+  "description": "Enterprise AI, data analytics, machine learning, and software delivery portfolio, client portal, and review management system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

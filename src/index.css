@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background-color: #030712;
+    color: #ffffff;
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.025em;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* -------------------------------------------------------------------------- */
+/* FILM GRAIN TEXTURE OVERLAY */
+/* -------------------------------------------------------------------------- */
+.film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* -------------------------------------------------------------------------- */
+/* FAINT DOT & GRID PATTERNS */
+/* -------------------------------------------------------------------------- */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.bg-dots-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+}
+
+/* -------------------------------------------------------------------------- */
+/* RICH GRADIENT BACKGROUNDS (Never flat solid black or white) */
+/* -------------------------------------------------------------------------- */
+.bg-gradient-dark-hero {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, #0c1222 0%, #030712 100%);
+}
+
+.bg-gradient-dark-section {
+  background: linear-gradient(180deg, #030712 0%, #0b1120 50%, #030712 100%);
+}
+
+.bg-gradient-dark-alt {
+  background: linear-gradient(180deg, #070d18 0%, #0e1726 50%, #070d18 100%);
+}
+
+.bg-gradient-light-section {
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+}
+
+/* Smooth gradient transitions between contrasting sections */
+.transition-dark-to-light {
+  background: linear-gradient(180deg, #030712 0%, #1e293b 30%, #64748b 70%, #f1f5f9 100%);
+}
+
+.transition-light-to-dark {
+  background: linear-gradient(180deg, #f1f5f9 0%, #475569 40%, #0f172a 80%, #030712 100%);
+}
+
+/* -------------------------------------------------------------------------- */
+/* AURORA GLOWS & DRIFTING COLOR BLOBS (Deep Blue, Indigo, Violet, Cyan) */
+/* Colors exist ONLY as background glows and patterns, NEVER text/buttons */
+/* -------------------------------------------------------------------------- */
+@keyframes aurora-drift-1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.15); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes aurora-drift-2 {
+  0% { transform: translate(0px, 0px) scale(1.1); }
+  50% { transform: translate(-50px, 25px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1.1); }
+}
+
+@keyframes aurora-drift-3 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(30px, 40px) scale(1.2); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-aurora-1 {
+  animation: aurora-drift-1 18s ease-in-out infinite;
+}
+
+.animate-aurora-2 {
+  animation: aurora-drift-2 22s ease-in-out infinite;
+}
+
+.animate-aurora-3 {
+  animation: aurora-drift-3 26s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-1,
+  .animate-aurora-2,
+  .animate-aurora-3 {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* CARD GRADIENT BORDERS & SOFT COLORED GLOW ON HOVER */
+/* -------------------------------------------------------------------------- */
+.card-depth {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.85) 0%, rgba(10, 15, 29, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-depth:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 0 35px -5px rgba(79, 70, 229, 0.2),
+    0 0 20px -2px rgba(56, 189, 248, 0.15),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Light Card Variant */
+.card-depth-light {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.9) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-depth-light:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 10px 30px -5px rgba(79, 70, 229, 0.12),
+    0 0 20px -2px rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
+}

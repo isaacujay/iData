@@ -1,0 +1,373 @@
+IData Business Portfolio: Business and Software Requirements
+Build prompt for the AI agent (Google AI Studio) | Version 2.0 | November 2026
+How to use this document: paste everything from Part 1 onward into Google AI Studio as the build prompt. Items marked [Owner decision] already have a default, so the agent never has to stop and ask. Change them before or after the build.
+Part 1: Mission and Rules
+1. Your role and mission
+You are a senior full-stack engineer, UX designer and technical writer. Build IData, a multi-page business website for a data, AI and software delivery company. The site must feel like a premium, trustworthy agency: a striking but short home page, great cards, real animation, a reviews page, a client portal and a professional footer. Deliver a complete project the owner can export, run on his own computer, and deploy.
+The finished project must run locally with zero configuration (demo mode with sample data), and must switch to live data as soon as the owner adds his own keys.
+2. Business context
+IData sells four service areas: AI and agentic systems, data analytics and dashboards, data science and machine learning, and software and web development. Work is delivered by a core team plus vetted freelancers, so the site presents a team and a delivery process, not one person.
+• Audiences: international clients (freelance and remote), larger companies and agencies, Nigerian SMEs and startups.
+• Goals: get quote requests and booked calls, prove credibility through case studies and reviews, and let clients follow their projects in a portal.
+• Tone: corporate and trustworthy. Plain language, confident, no hype, no jargon.
+• Positioning line (draft): IData turns business data into decisions through AI, analytics and software, delivered by a trusted team.
+3. Rules you must follow
+1. Use exactly this stack: React + TypeScript + Vite + Tailwind CSS + Framer Motion + React Router, Supabase for database, login and file storage, Vercel for hosting, Calendly for booking.
+2. Never hardcode text, images, links or lists inside components. All content lives in src/content/, all settings in src/config/site.config.ts.
+3. Secrets live only in environment variables. Provide .env.example. Only Supabase's public (anon) key may reach the browser.
+4. Demo mode: if environment variables are empty, the site still runs. Forms show a success message and log the data, the portal uses sample data, and a small dev-only banner says demo mode is on.
+5. Every spot where the owner must type something carries a // OWNER: comment and is listed in OWNER_GUIDE.md (Section 20).
+6. Produce two readmes: a public README.md and an owner-facing OWNER_GUIDE.md.
+7. The header stays minimal (Section 6). People move around the site through CTAs, cards and one full-screen menu, not through a long list of header links.
+8. Stay free-tier friendly: at most three videos, optimized images, lazy loading, no heavy libraries without a reason.
+9. No lorem ipsum. Write realistic placeholder copy and mark it // OWNER: replace.
+10. Keep the architecture easy to migrate and modify (Section 5).
+4. Technology and what each part does
+React only builds what the visitor sees in the browser. There is no custom backend server to maintain. Supabase supplies the database, user login, file storage and security rules. One small serverless function on Vercel sends email notifications. This keeps the project simple, free and easy to move later.
+Layer
+Choice
+Role
+Front end
+React, TypeScript, Vite, Tailwind CSS
+Pages, components, styling
+Animation
+Framer Motion
+Page transitions, scroll reveals, hover effects
+Routing
+React Router
+Multi-page navigation, lazy-loaded routes
+Database, login, files
+Supabase (Postgres, Auth, Storage)
+Leads, reviews, client portal, uploads
+Email notification
+One Vercel serverless function in api/
+Emails the owner when a form is submitted
+Booking
+Calendly inline embed
+Book a call, link set in config
+Hosting
+Vercel
+Automatic deploys from GitHub, free subdomain
+Search
+Fuse.js over a content index
+Instant site search, no server cost
+Video
+YouTube unlisted embeds with a click-to-load cover
+No video hosting cost
+5. System architecture
+Build the project so that content, services and UI are separate. Changing the database, the email provider or the booking tool must touch one folder, not the whole app.
+idata-site/
+├─ README.md                  public: what the site is, site structure, how to use it
+├─ OWNER_GUIDE.md             owner: everything to enter, where, and how to deploy
+├─ .env.example               every environment variable, with comments
+├─ api/
+│  └─ notify.ts               Vercel function: sends email on new lead or review
+├─ supabase/
+│  ├─ schema.sql              tables, indexes, triggers
+│  ├─ policies.sql            row-level security rules
+│  └─ seed.sql                optional sample data
+├─ public/
+│  ├─ brand/                  logo.svg, logo-mark.svg, favicon.ico, og-image.png
+│  └─ images/                 team/, work/, reviews/, hero/ (with a README.txt each)
+└─ src/
+   ├─ config/
+   │  └─ site.config.ts       brand name, tagline, theme colors, emails, social links, Calendly URL
+   ├─ content/
+   │  ├─ services.ts          the four services and their sub-offerings
+   │  ├─ caseStudies.ts       work and demos
+   │  ├─ team.ts              core team and extended network
+   │  ├─ reviews.ts           seed reviews (live ones come from the database)
+   │  ├─ faqs.ts, process.ts, stats.ts, partners.ts (marquee items), videos.ts
+   │  └─ legal/               privacy and terms text
+   ├─ services/               the only place that talks to outside systems
+   │  ├─ database.ts          interface + Supabase implementation
+   │  ├─ auth.ts, storage.ts, notify.ts, booking.ts
+   ├─ features/               one folder per feature: home, services, work, reviews, team,
+   │                          contact, portal, admin, search
+   ├─ components/             shared UI: Button, Card, Section, Marquee, Carousel, VideoEmbed, Footer
+   ├─ hooks/, lib/, types/    helpers and shared TypeScript types
+   ├─ routes.tsx              all routes, lazy-loaded
+   └─ styles/                 Tailwind layers and design tokens
+Architecture principles
+• Content layer: pages read content through typed functions (getServices()), never import raw data directly. Today they read src/content; later they can read Supabase without touching the pages.
+• Service layer: database.ts defines an interface (createLead, listProjects, submitReview and so on). Supabase is one implementation. Replacing it with another database means writing one new file.
+• Feature folders: each feature owns its pages, components and hooks.
+• Types first: shared TypeScript types for every data shape, matching the database tables.
+• Config over code: colors, fonts, links, emails and feature switches are set in config. Provide feature flags such as enablePortal, enableReviewsSubmission, enableBlog.
+• Lazy routes and code splitting so the first load stays small.
+6. Navigation model (minimal header)
+The owner does not want many header items. Build it like this:
+• Header (slim, sticky): logo on the left; on the right a search icon, a Menu button and one accent button, Request a Quote. On desktop show at most three plain links (Services, Work, Reviews). Everything else lives in the menu.
+• Menu: a full-screen overlay with large animated links to every page, grouped (Services with its four sub-pages, Company, Client area), a search field, social links and the quote and booking buttons.
+• Search: the search icon opens a command palette (also opened with Ctrl+K or Cmd+K) that searches services, case studies, team and FAQs and jumps to the result.
+• CTA-first navigation: every page ends with a Next step band of two or three cards pointing to related pages, and service pages link to matching case studies and reviews. Cards and buttons do the navigating, not header links.
+• Mobile: a slim bottom bar with Menu, Search and Quote. Menu opens the same overlay.
+• Back to top button and visible breadcrumbs on inner pages.
+7. Pages
+Page
+Route
+Purpose
+Main CTAs
+Home
+/
+Short, striking introduction
+Request a Quote, Book a Call, Explore services
+Services overview
+/services
+The four services as cards
+Open a service, Request a Quote
+Service detail (x4)
+/services/:slug
+Problem, solution, process, demo, related work and reviews
+Request a Quote, See case study
+Work and demos
+/work
+Filterable gallery of case studies
+Open case study
+Case study detail
+/work/:slug
+Challenge, solution, results, tools, media
+Start a similar project
+Reviews
+/reviews
+Carousels and wall of client reviews, review form
+Request a Quote, Leave a review
+Team
+/team
+Core team and extended network
+Work with us
+About
+/about
+Mission, values, delivery process, FAQs
+Book a Call
+Contact
+/contact
+Quote form and Calendly booking
+Submit, Book
+Client portal
+/portal
+Login, projects, milestones, files, messages
+Sign in
+Admin
+/admin
+Leads, reviews approval, projects, clients (IData only)
+Manage
+Legal
+/privacy, /terms
+Required policies
+none
+Not found
+*
+Friendly 404 with CTAs
+Go home
+7.1 Team page: leadership and people
+The /team page is where IData introduces its leadership and its people. Build it in three layers, all driven by src/content/team.ts:
+1. Leadership: large featured cards for the CEO and other leaders (for example Founder and CEO, CTO, Head of Data and AI, Head of Delivery, Head of Business Development). Each card shows a big photo, name, title, a two-line bio, three focus areas and social links. Clicking a card opens a detail panel with the full bio and the services that person leads.
+2. Core team: a grid of team cards grouped by service area (AI, Data, Software, Operations), with a filter chips row.
+3. Extended network: vetted freelancers and partners in a smaller card style, with a short note on how IData vets and reviews freelance work. Switch this layer on or off with a config flag.
+Each person entry in team.ts has: id, name, title, level (leadership, core, extended), area, photo, bio, focus (list), links (LinkedIn, GitHub, email), and order (to control display order). Adding a person is one new entry plus one photo in public/images/team/.
+End the page with a Next step band (Work with us, Book a Call, Join the network). Also add a short Meet the leadership teaser with a Meet the team CTA on the About page, and keep the Home page unchanged so it stays short.
+8. Home page specification
+The home page must be short: about three screens on desktop, and every section must lead somewhere through a CTA. Build these sections in this order:
+1. Hero: animated gradient mesh background using the theme colors, a short headline, one supporting line, two buttons (Request a Quote, Book a Call), and a small row of trust signals. Headline animates in word by word. A subtle floating dashboard or data-visual graphic reacts to the mouse.
+2. Continuous marquee strip: an infinite horizontal ticker (often called a logo marquee or logo slider) showing tools and technologies IData works with and, later, client logos. Two rows moving in opposite directions, pausing on hover, edge fade, smooth with no jump at loop point. Items come from partners.ts.
+3. Services: four interactive cards in a grid. Each card has an icon, one-line promise, three mini bullet points and an Explore CTA. Spotlight glow follows the cursor and the card tilts slightly in 3D.
+4. Featured demo: one large video card (click to load the YouTube video) beside three short proof points with animated counters.
+5. Reviews strip: an auto-scrolling carousel of three visible review cards with a Read all reviews CTA.
+6. Final call to action band: large headline, Request a Quote and Book a Call.
+7. Footer (Section 13).
+Do not add more sections. Do not repeat content that exists on its own page; teaser plus CTA only.
+Part 2: Design, Cards, Animation, Reviews, Footer
+9. Design system
+• Dark theme. Backgrounds and layers use the owner's colors, set as design tokens in src/styles and site.config.ts:
+Token
+Hex
+Use
+bg-base
+#000000
+Page background, deepest layer
+bg-deep
+#040f16
+Alternate section background
+bg-surface
+#000022
+Cards and panels
+bg-raised
+#001242
+Hover state, highlighted cards, gradient end
+accent
+#38BDF8
+Buttons, links, highlights [Owner decision]
+accent-2
+#6366F1
+Gradient partner for the accent [Owner decision]
+text
+#E6EDF5
+Body text
+text-muted
+#8FA3B8
+Secondary text
+border
+rgba(255,255,255,0.08)
+Card and divider lines
+• Use gradients between the four dark colors for depth (for example #000022 to #001242 to #040f16). Keep text contrast at WCAG AA or better.
+• Fonts (free, from Google Fonts, self-hosted through the build if possible): Sora or Plus Jakarta Sans for headings, Inter for body text. Fallback to system fonts.
+• Spacing and layout: 8-pixel grid, generous white space, maximum content width about 1200 pixels, large clear headings, one idea per section.
+• Buttons: one primary style (accent, glow on hover, magnetic pull toward the cursor), one secondary (outline), one text link with animated arrow.
+• Icons: one consistent line-icon set (Lucide).
+• Mobile first: design at 360 pixels wide first, then scale up. Touch targets at least 44 pixels.
+10. Card design
+Cards are the main building block, so make them excellent. Build one Card component with variants:
+• Service card: icon in a glowing badge, title, one-line promise, three bullets, Explore CTA, spotlight glow that follows the cursor, slight 3D tilt, border that brightens on hover.
+• Case study card: cover image or video thumbnail, client type tag, result headline (one number), tools row, hover reveals a short summary and an Open CTA.
+• Review card: quote, star rating, name, role and company, small avatar, a verified badge for approved reviews.
+• Team card: photo, name, role, three skill chips, social links on hover.
+• Stat card: large animated number, label.
+• Next-step card: icon, title, one line, arrow; used at the bottom of every page for navigation.
+All cards share rounded corners (16 to 24 pixels), a subtle glass or gradient surface, a one-pixel border and consistent padding. Hover and focus states are required on every card.
+11. Animation requirements
+The owner does not want basic fade-ins. Build polished, purposeful motion with Framer Motion and CSS. Required:
+• Page transitions between routes (short cross-fade with slight slide).
+• Hero: animated gradient mesh, word-by-word headline reveal, parallax floating graphic that follows the mouse, animated gradient border on the main button.
+• Scroll reveals with staggered children, used on every section, never longer than 600 milliseconds.
+• Infinite marquee with two opposing rows, pause on hover, edge fade.
+• Spotlight and tilt on cards.
+• Animated counters that count up when they scroll into view.
+• Menu overlay that opens with a staggered link reveal.
+• Command palette that scales in with a soft blur backdrop.
+• Scroll progress bar at the top of the page.
+• Text and number micro-interactions: underline sweeps on links, arrow nudges on CTAs.
+• Skeleton loaders for anything that loads from the database.
+Rules: animate only transform and opacity for speed, respect prefers-reduced-motion (turn motion off), keep the page smooth on a mid-range phone, and lazy-load heavy effects. Do not animate everything at once.
+12. Reviews page
+Build /reviews as a showpiece:
+1. Summary header: average rating, number of reviews, and a rating breakdown bar.
+2. Featured carousel: large review cards, auto-play, swipe on mobile, arrows and dots, pause on hover.
+3. Two opposing marquee rows of short review cards (one-liners) moving continuously.
+4. Filter chips: by service, by client type (international, agency, SME).
+5. Masonry wall of all approved reviews with a Load more button.
+6. Leave a review form: name, company, role, service, rating, text, optional photo. Submissions go to the database as pending and appear only after the owner approves them in the admin area.
+7. Closing Next step band: Request a Quote, Book a Call.
+Seed reviews come from src/content/reviews.ts (clearly marked as placeholders). Live approved reviews come from the reviews table and are merged in.
+13. Footer
+A professional, well-designed footer on every page:
+• Top band: a short call to action with Request a Quote and Book a Call.
+• Four columns: brand block (logo, one-sentence description, social icons), Services (the four links), Company (About, Team, Work, Reviews, Contact), Client area (Portal sign-in, Support email, FAQs).
+• Newsletter signup (saves to the database) [Owner decision].
+• Bottom bar: copyright, Privacy, Terms, and a back-to-top button.
+• Subtle gradient divider and a soft animated glow behind the brand block. Fully responsive: columns stack into expandable sections on mobile.
+Part 3: Data, Integrations, Documentation
+14. Database design (Supabase, PostgreSQL)
+Public marketing content (services, case studies, team, FAQs) stays in src/content so it is fast, free and easy to edit. The database holds only data that changes while the site runs. Write the full design as supabase/schema.sql and supabase/policies.sql, with comments, so the owner can paste them into the Supabase SQL editor.
+Table
+Key columns
+Purpose
+profiles
+id (links to auth user), full_name, company, role (client, team, freelancer, admin), avatar_url, created_at
+One row per signed-in user; created automatically by a trigger on sign-up with role client
+leads
+id, name, email, company, service_slug, budget_range, message, attachment_path, source_page, status (new, contacted, qualified, won, lost), created_at
+Quote requests
+reviews
+id, author_name, company, role_title, service_slug, rating (1 to 5), body, photo_path, status (pending, approved, rejected), featured, created_at, approved_at
+Client reviews with approval
+projects
+id, client_id, title, service_slug, summary, status (proposal, active, review, delivered, closed), start_date, due_date, created_at
+Client projects
+project_members
+project_id, user_id, member_role
+Team members and freelancers on a project
+milestones
+id, project_id, title, description, status, due_date, sort_order
+Progress steps
+deliverables
+id, project_id, milestone_id, title, file_path, published, created_at
+Files the client downloads
+messages
+id, project_id, sender_id, body, created_at
+Project conversation
+newsletter_subscribers
+id, email (unique), created_at
+Footer signup
+Required design qualities
+• UUID primary keys, created_at and updated_at timestamps with an update trigger, foreign keys with sensible delete rules, check constraints for ratings and statuses, indexes on foreign keys, status and created_at.
+• Row-level security on every table. Visitors can insert leads, pending reviews and newsletter signups, and can read approved reviews only. A client reads only their own projects, milestones, published deliverables and messages. Team members read projects they belong to. Only admins read leads and manage everything. Use a helper function is_admin().
+• Storage buckets: attachments (private, lead uploads), deliverables (private, signed download links), review-photos (public), avatars (public). Limit file size and type.
+• Provide seed.sql with sample rows for demo purposes only.
+• Everything is reached through src/services/database.ts, so replacing Supabase later means rewriting that one file and moving the SQL.
+15. Forms and email
+• Every form (quote, review, newsletter, contact) saves to the database first, so nothing is lost if email fails.
+• After saving, the front end calls api/notify.ts, a Vercel serverless function that emails the owner through Resend (free tier) using environment variables OWNER_EMAIL, RESEND_API_KEY and FROM_EMAIL. If these are empty, skip the email silently and rely on the admin area.
+• The quote form fields: name, email, company, service of interest, budget range, project description, optional file (limit 5 MB), consent checkbox.
+• Spam protection: hidden honeypot field, minimum fill time, basic rate limit in the function, and optional Cloudflare Turnstile behind a feature flag.
+• Show a success state with Next step cards (Book a Call, See case studies), and an error state with a mailto fallback.
+16. Booking
+Use a Calendly inline embed, loaded only on /contact and in a modal from Book a Call buttons. The link is the single value calendlyUrl in site.config.ts. If it is empty, show a fallback card with the owner's email instead. Calendly has a free plan with limits (the owner should confirm what it includes today). Keep the booking code behind src/services/booking.ts so Cal.com or another tool can replace it.
+17. Video and media
+• Use at most three videos in total, defined in src/content/videos.ts (YouTube ID, title, poster image).
+• Use a click-to-load cover image, then load the privacy-friendly YouTube embed. Videos never autoplay with sound and never load before the user clicks.
+• No self-hosted video files. Images in WebP or AVIF, responsive sizes, lazy loading, explicit width and height to avoid layout jumps. Keep each image under about 200 KB.
+• The hero and card visuals use CSS, SVG and canvas effects, not large media files.
+18. Search
+Build a client-side search index from services, case studies, team and FAQs using Fuse.js. Show it in the command palette with grouped results, keyboard navigation and recent searches. No server calls.
+19. Quality requirements
+Area
+Requirement
+Performance
+Lazy-loaded routes, small first load, Lighthouse performance 90 or higher on mobile for Home
+Accessibility
+Keyboard navigable, focus styles, alt text, captions or transcripts for videos, reduced-motion support
+Security
+HTTPS only, no secrets in code, row-level security, validated inputs, sanitized output
+SEO
+Page titles and descriptions per route, Open Graph image, sitemap.xml, robots.txt, structured data for the organization
+Privacy
+Cookie notice only if analytics is enabled, privacy policy page, collect only needed data
+Maintainability
+Strict TypeScript, ESLint and Prettier, small components, comments on non-obvious code
+Portability
+No provider lock-in outside src/services and api/
+Analytics
+Optional, one switch in config; default off
+20. The two documentation files you must write
+The agent must produce both files, in plain, friendly language for a non-expert owner, with exact file paths, exact variable names and copy-paste commands.
+20.1 README.md (public, for visitors and collaborators)
+• What IData is and who it serves, in a short intro with a screenshot placeholder.
+• The full site structure: a page tree with every route, what each page is for, and how the pages link to each other.
+• What a visitor can do: explore services, watch a demo, read reviews, request a quote, book a call, sign in to the portal.
+• A short feature list and an architecture overview diagram in text.
+• How to contact IData. No setup steps and no secrets in this file; point to OWNER_GUIDE.md for those.
+20.2 OWNER_GUIDE.md (private setup guide for Isaac)
+Include these sections in this order:
+1. Quick start: install Node.js, run npm install and npm run dev, see the site in demo mode.
+2. Everything you must provide (master checklist table): item, where to enter it, exact file or variable name, required or optional. Cover: logo files, favicon, social share image, brand name and tagline, theme accent colors, owner email, social links, Calendly link, service descriptions, case studies, team members, reviews, videos, FAQs, legal text, Supabase keys, email keys.
+3. Logo and images: exact folders and file names (public/brand/logo.svg, logo-mark.svg, favicon.ico, og-image.png at 1200 by 630), recommended sizes for team photos, case study covers and review avatars, and format and weight limits.
+4. Editing content: for every file in src/content, an annotated example showing each field and what it controls.
+5. Environment variables: a table of every variable in .env.example, what it is, and where to find it in the Supabase, Resend and Vercel dashboards.
+6. Supabase setup, step by step: create the project, run schema.sql, policies.sql and optional seed.sql, create storage buckets, configure sign-in and redirect URLs, make yourself the first admin with a provided SQL snippet, and test a form submission.
+7. Email setup: create a Resend account, verify the sender, copy the key, set the variables.
+8. Calendly setup: create an event type, copy the link into site.config.ts.
+9. Videos: upload to YouTube as unlisted, paste the ID into videos.ts.
+10. Test locally before deploying: a checklist of what to click and what should happen.
+11. Deploy to Vercel: push to GitHub, import the repository, add the environment variables, deploy, then add the Vercel address to Supabase redirect URLs.
+12. Adding your .com later: buy the domain, add it in Vercel, update Supabase site URL and site.config.ts.
+13. Modify and migrate: where to change the look, add a page, add a service, swap the database, swap email or booking, change hosting.
+14. Free-tier limits and backups: what to watch (database size, bandwidth, email count, inactive projects pausing), and how to export a backup.
+15. Troubleshooting: the ten most likely problems and fixes.
+16. Launch checklist.
+Also create .env.example with a comment above every variable.
+21. Build order and acceptance criteria
+Build order: (1) project setup, config, design tokens, layout, header, menu, footer; (2) home page and shared components; (3) services, work, team, about; (4) reviews page; (5) contact, forms, booking; (6) Supabase schema, auth and portal; (7) admin area; (8) search; (9) polish, performance, accessibility; (10) both documentation files.
+Acceptance criteria
+• Every route in Section 7 loads and works on a 360-pixel phone.
+• The header has no more than three plain links plus Menu, Search and Request a Quote.
+• The home page is about three screens long and contains only the sections in Section 8.
+• The marquee runs continuously without a visible jump and pauses on hover.
+• The project runs with no environment variables set (demo mode) and with them set (live mode).
+• A quote request is saved and the owner is emailed when email keys exist.
+• A pending review appears only after admin approval.
+• A client sees only their own project; a visitor cannot read leads.
+• No more than three videos, none loading before a click.
+• Both documentation files exist and every owner input is listed with its exact location.
+• When finished, the agent prints a short summary: files created, what the owner must provide next, and how to run the project.
+22. Owner decisions and defaults
